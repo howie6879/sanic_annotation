@@ -1,4 +1,4 @@
-from sanic import Sanic
+from sanic_0_1_2.src import Sanic
 from sanic.log import log
 from sanic.response import json, text
 from sanic.exceptions import ServerError
@@ -24,6 +24,7 @@ def test_params(request, name, id):
 @app.route("/exception")
 def exception(request):
     raise ServerError("It's dead jim")
+
 
 @app.route("/await")
 async def test_await(request):

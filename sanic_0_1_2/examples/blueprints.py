@@ -1,7 +1,6 @@
-from sanic import Sanic
-from sanic import Blueprint
-from sanic.response import json, text
-
+from sanic_0_1_2.src import Sanic
+from sanic_0_1_2.src import Blueprint
+from sanic_0_1_2.src.response import json, text
 
 app = Sanic(__name__)
 blueprint = Blueprint('name', url_prefix='/my_blueprint')
