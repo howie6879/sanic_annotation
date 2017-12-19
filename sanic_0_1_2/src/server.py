@@ -45,11 +45,22 @@ class HttpProtocol(asyncio.Protocol):
     # -------------------------------------------- #
 
     def connection_made(self, transport):
+        """
+        注释：每当有一个新的客户端连接，该方法就会被触发
+        :param transport:  transport 参数是一个 asyncio.Transport 实例对象
+        :return:
+        """
         self.connections[self] = True
+        # 超时时间后执行 connection_timeout 并且关闭 self.transport 对象
         self._timeout_handler = self.loop.call_later(self.request_timeout, self.connection_timeout)
         self.transport = transport
 
     def connection_lost(self, exc):
+        """
+        当一个连接被关闭的时候
+        :param exc:
+        :return:
+        """
         del self.connections[self]
         self._timeout_handler.cancel()
         self.cleanup()
@@ -63,6 +74,11 @@ class HttpProtocol(asyncio.Protocol):
     # -------------------------------------------- #
 
     def data_received(self, data):
+        """
+        当有数据从客户端发到服务端的时候会使用传输过来的数据调用此方法
+        :param data: 传输过来的数据
+        :return:
+        """
         # Check for the request itself getting too large and exceeding memory limits
         self._total_request_size += len(data)
         if self._total_request_size > self.request_max_size:
@@ -84,12 +100,14 @@ class HttpProtocol(asyncio.Protocol):
         self.url = url
 
     def on_header(self, name, value):
+        # 继 on_url 后被循环调用 生成self.headers
         if name == b'Content-Length' and int(value) > self.request_max_size:
             return self.bail_out("Request body too large ({}), connection closed".format(value))
 
         self.headers.append((name.decode(), value.decode('utf-8')))
 
     def on_headers_complete(self):
+        # 继 on_header 后被调用 实例化 Request 类
         self.request = Request(
             url_bytes=self.url,
             headers=dict(self.headers),
@@ -101,6 +119,7 @@ class HttpProtocol(asyncio.Protocol):
         self.request.body = body
 
     def on_message_complete(self):
+        # 继 on_headers_complete 后被调用 执行 self.request_handler 最后回调给 self.write_response
         self.loop.create_task(self.request_handler(self.request, self.write_response))
 
     # -------------------------------------------- #
@@ -108,6 +127,8 @@ class HttpProtocol(asyncio.Protocol):
     # -------------------------------------------- #
 
     def write_response(self, response):
+        # on_message_complete 回调 write_response 返回响应值
+        # response 为 HTTPResponse 响应对象 包含 content_type body headers status
         try:
             keep_alive = self.parser.should_keep_alive() and not self.signal.stopped
             self.transport.write(response.output(self.request.version, keep_alive, self.request_timeout))
@@ -120,6 +141,7 @@ class HttpProtocol(asyncio.Protocol):
 
     def bail_out(self, message):
         log.error(message)
+        # 关闭连接 此时 connection_lost 会被执行
         self.transport.close()
 
     def cleanup(self):
@@ -155,6 +177,8 @@ def serve(host, port, request_handler, after_start=None, before_stop=None, debug
 
     connections = {}
     signal = Signal()
+    # 一个可以创建 TCP 服务的协程
+    # 每当一个新的客户端建立连接 服务 就会创建一个新的 Protocol 实例
     server_coroutine = loop.create_server(lambda: HttpProtocol(
         loop=loop,
         connections=connections,
@@ -164,6 +188,7 @@ def serve(host, port, request_handler, after_start=None, before_stop=None, debug
         request_max_size=request_max_size,
     ), host, port)
     try:
+        # <Server sockets=[<socket.socket fd=14, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('0.0.0.0', 8000)>]>
         http_server = loop.run_until_complete(server_coroutine)
     except OSError as e:
         log.error("Unable to start server: {}".format(e))
@@ -189,6 +214,7 @@ def serve(host, port, request_handler, after_start=None, before_stop=None, debug
 
     try:
         # 注释：
+        # 运行这个事件循环，以便接收客户端请求以及处理相关事件
         # 一直运行，直到loop.close()
         loop.run_forever()
     finally:

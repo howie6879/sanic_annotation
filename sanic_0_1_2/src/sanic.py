@@ -13,12 +13,22 @@ from .exceptions import ServerError
 
 class Sanic:
     def __init__(self, name, router=None, error_handler=None):
+        """
+        构建一个 Sanic 服务必须要实例化的类
+        :param name: 服务名 默认为 __name__
+        :param router: 路由类 默认为 Router
+        :param error_handler: 错误处理类 默认 Handler
+        """
         self.name = name
         self.router = router or Router()
         self.error_handler = error_handler or Handler(self)
+        # 配置类
         self.config = Config()
+        # 请求中间件
         self.request_middleware = []
+        # 响应中间件
         self.response_middleware = []
+        # 蓝图
         self.blueprints = {}
         self._blueprint_order = []
 
@@ -34,7 +44,6 @@ class Sanic:
         :param methods: list or tuple of methods allowed
         :return: decorated function
         """
-
         def response(handler):
             self.router.add(uri=uri, methods=methods, handler=handler)
             return handler

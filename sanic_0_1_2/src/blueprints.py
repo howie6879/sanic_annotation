@@ -42,6 +42,11 @@ class BlueprintSetup:
 
 class Blueprint:
     def __init__(self, name, url_prefix=None):
+        """
+        蓝图类
+        :param name: 蓝图名称
+        :param url_prefix: 该蓝图对于url前缀
+        """
         self.name = name
         self.url_prefix = url_prefix
         self.deferred_functions = []
@@ -67,6 +72,7 @@ class Blueprint:
 
     def route(self, uri, methods=None):
         """
+        蓝图路由装饰器
         """
         def decorator(handler):
             self.record(lambda s: s.add_route(handler, uri, methods))
