@@ -1,5 +1,10 @@
 class BlueprintSetup:
     """
+    这个类的主要作用是：
+        - 添加路由
+        - 添加exception
+        - 添加中间件
+    会在Blueprint.make_setup_state中被实例化，以路由为例，会调用Router.add从而添加一个uri与视图函数的映射关系
     """
 
     def __init__(self, blueprint, app, options):
