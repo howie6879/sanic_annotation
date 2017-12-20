@@ -18,6 +18,10 @@ class Signal:
 
 
 class HttpProtocol(asyncio.Protocol):
+    """
+    用来处理与客户端通信
+    https://pymotw.com/3/asyncio/io_protocol.html
+    """
     __slots__ = ('loop', 'transport', 'connections', 'signal',  # event loop, connection
                  'parser', 'request', 'url', 'headers',  # request params
                  'request_handler', 'request_timeout', 'request_max_size',  # request config

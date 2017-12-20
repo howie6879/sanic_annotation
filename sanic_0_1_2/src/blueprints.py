@@ -50,7 +50,7 @@ class Blueprint:
         """
         蓝图类
         :param name: 蓝图名称
-        :param url_prefix: 该蓝图对于url前缀
+        :param url_prefix: 该蓝图的url前缀
         """
         self.name = name
         self.url_prefix = url_prefix

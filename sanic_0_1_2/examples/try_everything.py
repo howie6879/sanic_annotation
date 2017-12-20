@@ -1,7 +1,7 @@
 from sanic_0_1_2.src import Sanic
-from sanic.log import log
-from sanic.response import json, text
-from sanic.exceptions import ServerError
+from sanic_0_1_2.src.log import log
+from sanic_0_1_2.src.response import json, text
+from sanic_0_1_2.src.exceptions import ServerError
 
 app = Sanic(__name__)
 
